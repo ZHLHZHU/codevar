@@ -358,49 +358,57 @@ var urlEncode = function (param, key, encode) {
  * @param result
  * @returns {Array}
  */
-var dataToProcess = function (result) {
-    //结果
+const dataToProcess = function (result) {
+    // 结果
+    console.log("1");
     let result_value = [];
+    if (!result) {
+        return result_value;
+    }
+    // 为了去重
+    let result_marker = new Set();
     // 过滤中文
     let reg = /^[a-zA-Z ]/;
     // 标准翻译结果 : translation
     let result_translation = result.translation;
     if (result_translation) {
-        for (let i = 0, len = result_translation.length; i < len; i++) {
-            if (reg.test(result_translation[i])) {
-                result_value.push({
-                    title: style(result_translation[i]),
-                    description: `标准翻译 => ${result_translation[i]}`,
-                    arg: style(result_translation[i]),
-                    icon:'',
-                });
+        for (const variable_name of result_translation) {
+            if (!reg.test(variable_name) || result_marker.has(style(variable_name))) {
+                continue;
             }
+            const format_name = style(variable_name);
+            result_value.push({
+                title: format_name,
+                description: `标准翻译 => ${variable_name}`,
+                arg: format_name,
+                icon: '',
+            });
+            result_marker.add(format_name);
         }
-    } else {
-        return [];
     }
+    console.log(result_value)
     // 网络翻译 : web
-    if (result.web) {
-        let result_web = result.web;
-        if (result_web) {
-            for (let i = 0, len = result_web.length; i < len; i++) {
-                for (let j = 0, ilen = result_web[i].value.length; j < ilen; j++) {
-                    if (reg.test(result_web[i].value[j])) {
-                        result_value.push({
-                            title: style(result_web[i].value[j]),
-                            description: `网络翻译 => ${result_web[i].value[j]}`,
-                            arg: style(result_web[i].value[j]),
-                            icon:'',
-                        });
-                    }
+    let result_web = result.web;
+    if (result_web) {
+        for (const result_list of result_web) {
+            for (const variable_name of result_list.value) {
+                if (!reg.test(variable_name) || result_marker.has(style(variable_name))) {
+                    continue;
                 }
+                const format_name = style(variable_name);
+                result_value.push({
+                    title: format_name,
+                    description: `网络翻译 => ${variable_name}`,
+                    arg: format_name,
+                    icon: '',
+                });
+                result_marker.add(format_name);
             }
-        } else {
-            result_value = [];
         }
-
     }
+    console.log(result_value)
 
+    result_marker.clear();
     return result_value;
 };
 
