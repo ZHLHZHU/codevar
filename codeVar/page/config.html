@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <script type="text/javascript" src="./js/jquery.slim.min.js"></script>
+    <script type="text/javascript" src="./js/bootstrap.bundle.min.js"></script>
+    <title>变量起名插件配置</title>
+</head>
+<body>
+<div class="container-sm" v-scope>
+    <div class="card">
+        <div class="card-header">
+            <span>翻译数据源配置</span>
+            <button
+                    type="button"
+                    :class="['btn', isChange?'btn-success':'btn-outline-dark']"
+                    :disabled="!isChange"
+                    style="float: right"
+                    @click="save"
+            >保存
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="btn-group">
+                <button
+                        class="btn btn-secondary dropdown-toggle"
+                        type="button"
+                        data-toggle="dropdown"
+                        aria-expanded="false"
+                        style="margin-bottom: 1rem!important;"
+                >
+                    {{ current_data_source.cn }}
+                </button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item"
+                       @click="changeDataSource(source)"
+                       v-for="source in data_source"
+                    >
+                        {{ source.cn }}
+                    </a>
+                </div>
+            </div>
+            <div v-for="arg in current_data_source.args" class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroup-sizing-default">{{ arg.name }}</span>
+                </div>
+                <input
+                        type="text"
+                        class="form-control"
+                        aria-label="Sizing example input"
+                        aria-describedby="inputGroup-sizing-default"
+                        @input="configContentChange"
+                        v-model="arg.value"
+                >
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import {createApp} from './js/petite-vue.js'
+    const DATA_SOURCE_CONFIG_DB_KEY = "data_source_config";
+
+    const app = createApp({
+        isChange: false,
+        current_data_source: {
+            name: "default",
+            cn: "默认",
+            args: []
+        },
+        data_source: [
+            {
+                name: "default",
+                cn: "默认",
+                args: []
+            },
+            {
+                name: "youdao",
+                cn: "有道",
+                args: [{name: "APPID", value: ""}, {name: "密钥", value: ""}]
+            },
+            {
+                name: "baidu",
+                cn: "百度",
+                args: [{name: "APPID", value: ""}, {name: "密钥", value: ""}]
+            }
+        ],
+        mounted() {
+            const oldConfig = utools.db.get(DATA_SOURCE_CONFIG_DB_KEY);
+            if (oldConfig && oldConfig.data) {
+                this.current_data_source = oldConfig.data
+            }
+        },
+        changeDataSource: function (res) {
+            this.current_data_source = res;
+        },
+        configContentChange: function () {
+            this.isChange = true;
+        },
+        save: function () {
+            this.isChange = false;
+            let oldConfig = utools.db.get(DATA_SOURCE_CONFIG_DB_KEY);
+            let saveData = {
+                _id: DATA_SOURCE_CONFIG_DB_KEY,
+                data: this.data_source
+            }
+            if (oldConfig && oldConfig._rev) {
+                saveData["_rev"] = oldConfig._rev
+            }
+            utools.db.put(saveData);
+        }
+    });
+    app.mount();
+</script>
+</body>
+</html>

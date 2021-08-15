@@ -4,8 +4,8 @@ const convert = require('./function/convert.js');
 const config = require('./config.js');
 
 var userAction = {
-    auto_shutdown:1,
-    auto_keyboard_shortcuts:1,
+    auto_shutdown: 1,
+    auto_keyboard_shortcuts: 1,
 };
 var model = '';
 var promptText = '请输入要转化的文字';
@@ -13,19 +13,17 @@ var inputValue = '';
 //输入延迟
 var inputLag = 350;
 
-var onload = function()
-{
+var onload = function () {
     var fundebug = require("fundebug-javascript");
     fundebug.apikey = "20634a54043152c8d1a3a92054ad2412a1af0a591aaf11ed21ee5d046b4cb8d0";
 };
 
-var onSearch = function(action, searchWord, callbackSetList)
-{
+var onSearch = function (action, searchWord, callbackSetList) {
     try {
         model = action.payload;
         inputValue = searchWord;
         let selectData = [];
-        if(inputValue !== '') {
+        if (inputValue !== '') {
             if (timerRunner === false) {
                 callbackSetList([]);
                 timerRunner = true;
@@ -43,14 +41,14 @@ var onSearch = function(action, searchWord, callbackSetList)
     }
 };
 
-var onEnter = function(action, callbackSetList) {
+var onEnter = function (action, callbackSetList) {
     model = action.payload;
     setPlaceholder(action.payload);
     onload();
     callbackSetList([]);
 };
 
-var onSelect = function(action, itemData) {
+var onSelect = function (action, itemData) {
     try {
         enter(itemData.arg);
     } catch (e) {
@@ -59,6 +57,22 @@ var onSelect = function(action, itemData) {
 };
 
 window.exports = {
+    "config": {
+        mode: "none",
+        args: {
+            enter: () => {
+                utools.createBrowserWindow("./page/config.html", {
+                    devTools: true,
+                    webPreferences: {
+                        preload: "preload.js",
+                        devTools: true
+                    }
+                },()=>{
+                    BrowserWindow.webContents.openDevTools();
+                })
+            }
+        }
+    },
     "big_hump": {
         mode: "list",
         args: {
@@ -137,12 +151,12 @@ window.exports = {
 };
 
 
-var urlEncode = function(param, key, encode) {
-    if (param==null) return '';
+var urlEncode = function (param, key, encode) {
+    if (param == null) return '';
     var paramStr = '';
     var t = typeof (param);
     if (t == 'string' || t == 'number' || t == 'boolean') {
-        paramStr += '&' + key + '='  + ((encode==null||encode) ? encodeURIComponent(param) : param);
+        paramStr += '&' + key + '=' + ((encode == null || encode) ? encodeURIComponent(param) : param);
     } else {
         for (var i in param) {
             var k = key == null ? i : key + (param instanceof Array ? '[' + i + ']' : '.' + i)
@@ -156,13 +170,12 @@ var urlEncode = function(param, key, encode) {
  * 获取处理后的列表数据.
  * @returns {Array}
  */
-var getListData = function()
-{
+var getListData = function () {
     let returnData = [];
     var url = config.youDaoApi;
     var stop = false;
-    for (var i = 0; i<config.key_max_step; i++ ) {
-        if((!stop) && (inputValue !== '')) {
+    for (var i = 0; i < config.key_max_step; i++) {
+        if ((!stop) && (inputValue !== '')) {
             let xhr = null;
             if (window.XMLHttpRequest) {
                 xhr = new XMLHttpRequest();
@@ -260,8 +273,7 @@ var style = function (str) {
  * 设置子搜索placeholder
  * @param payload 进入时模式
  */
-var setPlaceholder = function(payload)
-{
+var setPlaceholder = function (payload) {
     promptText = '请输入';
     switch (payload) {
         case 'xt': {
@@ -301,12 +313,12 @@ var setPlaceholder = function(payload)
 
 function enter(text) {
     utools.copyText(text);
-    if(userAction.auto_shutdown === 1) {
+    if (userAction.auto_shutdown === 1) {
         utools.hideMainWindow();
     }
     utools.setSubInputValue('');
     utools.outPlugin();
-    if(userAction.auto_keyboard_shortcuts === 1) {
+    if (userAction.auto_keyboard_shortcuts === 1) {
         if (utools.isWindows()) {
             utools.simulateKeyboardTap('v', 'ctrl')
             // utools.robot.keyToggle("v", "down", "control");
@@ -318,7 +330,7 @@ function enter(text) {
             utools.simulateKeyboardTap('v', 'command')
         }
         //other
-        if(utools.isLinux()) {
+        if (utools.isLinux()) {
             // utools.robot.keyToggle("v", "down", "control");
             // utools.robot.keyToggle("v", "up", "control");
             utools.simulateKeyboardTap('v', 'ctrl')
